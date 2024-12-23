@@ -1,0 +1,117 @@
+package org.yishang;
+
+import javax.swing.*;
+
+
+public class MybatisGenerator {
+
+	private JPanel mainPanel;
+	private JTextField mysqlAddress;
+	private JLabel mysqlAddressLabel;
+	private JLabel userNameLabel;
+	private JTextField userName;
+	private JLabel passwordLabel;
+	private JTextField password;
+	private JLabel generatePathLabel;
+	private JTextField generatePath;
+	private JLabel generateTableLabel;
+	private JTextField generateTable;
+	private JButton generateButton;
+
+	public JPanel getMainPanel() {
+		return mainPanel;
+	}
+
+	public void setMainPanel(JPanel mainPanel) {
+		this.mainPanel = mainPanel;
+	}
+
+	public JTextField getMysqlAddress() {
+		return mysqlAddress;
+	}
+
+	public void setMysqlAddress(JTextField mysqlAddress) {
+		this.mysqlAddress = mysqlAddress;
+	}
+
+	public JLabel getMysqlAddressLabel() {
+		return mysqlAddressLabel;
+	}
+
+	public void setMysqlAddressLabel(JLabel mysqlAddressLabel) {
+		this.mysqlAddressLabel = mysqlAddressLabel;
+	}
+
+	public JTextField getUserName() {
+		return userName;
+	}
+
+	public void setUserName(JTextField userName) {
+		this.userName = userName;
+	}
+
+	public JTextField getPassword() {
+		return password;
+	}
+
+	public void setPassword(JTextField password) {
+		this.password = password;
+	}
+
+	public JLabel getPasswordLabel() {
+		return passwordLabel;
+	}
+
+	public void setPasswordLabel(JLabel passwordLabel) {
+		this.passwordLabel = passwordLabel;
+	}
+
+	public JLabel getUserNameLabel() {
+		return userNameLabel;
+	}
+
+	public void setUserNameLabel(JLabel userNameLabel) {
+		this.userNameLabel = userNameLabel;
+	}
+
+	public JTextField getGeneratePath() {
+		return generatePath;
+	}
+
+	public void setGeneratePath(JTextField generatePath) {
+		this.generatePath = generatePath;
+	}
+
+	public JLabel getGeneratePathLabel() {
+		return generatePathLabel;
+	}
+
+	public void setGeneratePathLabel(JLabel generatePathLabel) {
+		this.generatePathLabel = generatePathLabel;
+	}
+
+	public JTextField getGenerateTable() {
+		return generateTable;
+	}
+
+	public void setGenerateTable(JTextField generateTable) {
+		this.generateTable = generateTable;
+	}
+
+	public JLabel getGenerateTableLabel() {
+		return generateTableLabel;
+	}
+
+	public void setGenerateTableLabel(JLabel generateTableLabel) {
+		this.generateTableLabel = generateTableLabel;
+	}
+
+	public JButton getGenerateButton() {
+		return generateButton;
+	}
+
+	public void setGenerateButton(JButton generateButton) {
+		this.generateButton = generateButton;
+	}
+
+}

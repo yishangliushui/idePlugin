@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.yishang.form.TimerUI">
+  <grid id="27dc6" binding="mianJPanel" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="434" height="242"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="afa07" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="141" height="18"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="更新时间间隔/s"/>
+        </properties>
+      </component>
+      <component id="2b25" class="javax.swing.JTextField" binding="updateInterval">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="ad635" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="141" height="18"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="活跃时间间隔/s"/>
+        </properties>
+      </component>
+      <component id="471b7" class="javax.swing.JTextField" binding="activeInterval">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="481ff" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="141" height="18"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="通知时间间隔/s"/>
+        </properties>
+      </component>
+      <component id="8567f" class="javax.swing.JTextField" binding="alarmTime">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="26203" class="javax.swing.JTextArea" binding="spacedNotifityMsg">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="78"/>
+            <maximum-size width="-1" height="80"/>
+          </grid>
+        </constraints>
+        <properties>
+          <editable value="false"/>
+          <text value="模版如下：&#10;spacedNotifityMsg:间隔通知消息[不设置默认]&#10;time(HHmmss):固定时间通知消息&#10;time(HHmmss):固定时间通知消息"/>
+        </properties>
+      </component>
+      <component id="de6fe" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="90" height="78"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="自定义通知规则"/>
+        </properties>
+      </component>
+      <component id="897c3" class="javax.swing.JTextArea" binding="alarmRuleArea">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="50"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value=""/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

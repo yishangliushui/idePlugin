@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.yishang.form.MybatisGenerator">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="408" height="476"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="73c0f" class="javax.swing.JTextArea" binding="generatorTextArea">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="50"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="mysqlAddress:&#10;userName:&#10;password:&#10;generatePath:&#10;author:&#10;package:&#10;libraryPackageName:"/>
+        </properties>
+      </component>
+      <component id="58d08" class="javax.swing.JButton" binding="generatorButton">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="398" height="30"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="生成表"/>
+        </properties>
+      </component>
+      <component id="acde1" class="javax.swing.JTextArea" default-binding="true">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="398" height="50"/>
+          </grid>
+        </constraints>
+        <properties>
+          <editable value="false"/>
+          <text value="生成表规则模版：&#10;mysqlAddress:数据库jdbc链接&#10;userName:用户账号&#10;password:用户密码&#10;tables:需要生成的表(多个以&quot;,&quot;拼接)&#10;generatePath:生成文件的路径（绝对路径）&#10;author:作者名(默认计算机用户名)&#10;package:包名(不填默认&quot;&quot;)&#10;libraryPackageName:库名（一个项目有多数据源的情况下，默认为&quot;&quot;）&#10;&#10;包规则详情&#10;package=org.yishang&#10;libraryPackageName=call&#10;包路径如下：&#10;org.yishang.controller.call&#10;org.yishang.dao.call&#10;org.yishang.sevice.call"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

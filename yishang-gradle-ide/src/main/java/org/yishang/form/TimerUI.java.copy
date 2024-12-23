@@ -1,0 +1,63 @@
+package org.yishang.form;
+
+import lombok.Data;
+
+import javax.swing.*;
+
+@Data
+public class TimerUI {
+//	private JTextField updateInterval;
+//	private JTextField activeInterval;
+	private JPanel mianJPanel;
+	private JTextField alarmTime;
+	private JTextArea alarmRuleArea;
+	private JTextArea spacedNotifityMsg;
+
+//	public JTextField getUpdateInterval() {
+//		return updateInterval;
+//	}
+//
+//	public void setUpdateInterval(JTextField updateInterval) {
+//		this.updateInterval = updateInterval;
+//	}
+//
+//	public JTextField getActiveInterval() {
+//		return activeInterval;
+//	}
+//
+//	public void setActiveInterval(JTextField activeInterval) {
+//		this.activeInterval = activeInterval;
+//	}
+
+	public JPanel getMianJPanel() {
+		return mianJPanel;
+	}
+
+	public void setMianJPanel(JPanel mianJPanel) {
+		this.mianJPanel = mianJPanel;
+	}
+
+	public JTextField getAlarmTime() {
+		return alarmTime;
+	}
+
+	public void setAlarmTime(JTextField alarmTime) {
+		this.alarmTime = alarmTime;
+	}
+
+	public JTextArea getAlarmRuleArea() {
+		return alarmRuleArea;
+	}
+
+	public void setAlarmRuleArea(JTextArea alarmRuleArea) {
+		this.alarmRuleArea = alarmRuleArea;
+	}
+
+	public JTextArea getSpacedNotifityMsg() {
+		return spacedNotifityMsg;
+	}
+
+	public void setSpacedNotifityMsg(JTextArea spacedNotifityMsg) {
+		this.spacedNotifityMsg = spacedNotifityMsg;
+	}
+}
