@@ -43,6 +43,7 @@ public class SingletonUtil {
 							}
 						}).start();
 					}
+					// 问题，启动多个项目时，多进程会导致数据统计不准确。
 				}
 			}
 			return statisticsData;

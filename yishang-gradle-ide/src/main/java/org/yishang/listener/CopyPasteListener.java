@@ -24,6 +24,13 @@ public class CopyPasteListener implements CopyPastePreProcessor {
 	public @NotNull String preprocessOnPaste(Project project, PsiFile psiFile, Editor editor, String text, RawText rawText) {
 		StatisticsData statisticsData = SingletonUtil.getInstance();
 		statisticsData.getPasteCount().incrementAndGet();
+//		String message = String.format("runProjectPath=%s,projectPath=%s", project.getLocationHash(), project.getProjectFilePath());
+//		Notification notification = new Notification("Attach to Process action", "输出信息2", message, NotificationType.WARNING);
+//		// 在提示消息中，增加一个 Action，可以通过 Action 一步打开配置界面
+//		//notification.addAction(new CustomSettingAction());
+//		// 发送通知
+//		Notifications.Bus.notify(notification, project);
+
 		return text;
 	}
 }

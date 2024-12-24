@@ -3,6 +3,9 @@ package org.yishang.util;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -48,6 +51,15 @@ public class WindowUtil {
 		if (toolWindow != null) {
 			toolWindow.activate(null, false);
 		}
+	}
+
+	public static void consoleError(Project project, String message) {
+		//					// 输出到Notiyfy
+		Notification notification = new Notification("Attach to Process action", "输出信息", message, NotificationType.WARNING);
+		// 在提示消息中，增加一个 Action，可以通过 Action 一步打开配置界面
+		//notification.addAction(new CustomSettingAction());
+		// 发送通知
+		Notifications.Bus.notify(notification, project);
 	}
 }
 

@@ -1,11 +1,14 @@
 package org.yishang.listener;
 
 import com.alibaba.fastjson.JSON;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.startup.ProjectActivity;
+import com.intellij.notification.Notification;
 import com.intellij.openapi.wm.WindowManager;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -17,6 +20,7 @@ import org.yishang.persistent.UITimesState;
 import org.yishang.util.DateUtil;
 import org.yishang.util.SingletonUtil;
 import org.yishang.util.StringUtil;
+import org.yishang.util.WindowUtil;
 
 import javax.swing.*;
 import java.time.LocalTime;
@@ -138,6 +142,7 @@ public class ProjectStartListener implements ProjectActivity {
 					// 避免多个项目运行时间统计多次, 增加满足以下规则才进行时间统计:
 					// 当前项目与配置信息一致, 或配置信息为空, 或配置信息内的项目不处于打开状态
 					String projectPath = project.getLocationHash();
+					//String projectPath = project.getProjectFilePath();
 					String firstOrNull = null;
 					@NotNull Project[] openProjects = ProjectManager.getInstance().getOpenProjects();
 					for (Project openProject : openProjects) {
@@ -151,17 +156,25 @@ public class ProjectStartListener implements ProjectActivity {
 					JFrame frame = WindowManager.getInstance().getFrame(project);
 
 					boolean active = frame.isActive();
+
 					if (Objects.equals(uiTimesState.getRunProjectPath(), projectPath)
-							|| uiTimesState.getRunProjectPath().isBlank()
-							|| firstOrNull == null) {
+								|| uiTimesState.getRunProjectPath().isBlank()
+								|| firstOrNull == null) {
+
+					}
+					// 修改判断条件
+					if (active) {
 						uiTimesState.setRunProjectPath(projectPath);
 						StatisticsData statisticsData = SingletonUtil.getInstance();
+//						String message = String.format("runProjectPath=%s \n,projectPath=%s \n,active=%s \n," +
+//								"firstOrNull=%s \n, active=%s \n, " +
+//								"runtime=%s \n, createDate=%s \n,", uiTimesState.getRunProjectPath(), projectPath, active, firstOrNull, statisticsData.getActiveTime(), statisticsData.getRunTime(), statisticsData.getCreateDate());
+//						WindowUtil.consoleError(project, message);
+						//
 						if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
-							statisticsData.getRunTime().addAndGet(updateInterval);
-							if (active) {
-								statisticsData.getActiveTime().addAndGet(activeInterval);
-								uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
-							}
+							//statisticsData.getRunTime().addAndGet(updateInterval);
+							statisticsData.getActiveTime().addAndGet(activeInterval);
+							uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
 						} else {
 							Integer historySize = StringUtils.isBlank(uiTimesState.getMaxHistoryDay()) ? 365 : Integer.parseInt(uiTimesState.getMaxHistoryDay());
 							List<String> historyData = JSON.parseObject(uiTimesState.getHistoryData(), List.class);
@@ -175,13 +188,10 @@ public class ProjectStartListener implements ProjectActivity {
 
 							StatisticsData newData = SingletonUtil.getClearStatisticsData();
 							newData.getRunTime().addAndGet(updateInterval);
-							if (active) {
-								newData.getActiveTime().addAndGet(activeInterval);
-							}
+							newData.getActiveTime().addAndGet(activeInterval);
 							//uiTimesState.setStatisticsData(JSON.toJSONString(newData));
 						}
 					}
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
