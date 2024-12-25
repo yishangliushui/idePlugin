@@ -176,12 +176,12 @@ public class ProjectStartListener implements ProjectActivity {
 		alarmMonitoringThread.start();
 
 		statisticsMonitoringThread = new Thread(() -> {
+			Long activeInterval = 2000L;
+			Long updateInterval = 2000L;
 			while (running.get()) {
 				// 判断编辑器是否处于活跃状态
 				//Long activeInterval = (null == uiTimesState.getActiveInterval() ? 30 * 1000 : uiTimesState.getActiveInterval()) * 1000;
 				//Long updateInterval = (null == uiTimesState.getUpdateInterval() ? 30 * 1000 : uiTimesState.getUpdateInterval()) * 1000;
-				Long activeInterval = 2000L;
-				Long updateInterval = 2000L;
 				try {
 					// 避免多个项目运行时间统计多次, 增加满足以下规则才进行时间统计:
 					// 当前项目与配置信息一致, 或配置信息为空, 或配置信息内的项目不处于打开状态
@@ -223,7 +223,7 @@ public class ProjectStartListener implements ProjectActivity {
 							//uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
 						} else {
 							SingletonUtil.writeStatistics(uiTimesState.getMaxHistoryDay());
-							statisticsData.getRunTime().addAndGet(updateInterval);
+							statisticsData.getActiveTime().addAndGet(updateInterval);
 						}
 					}
 				} catch (Exception e) {
