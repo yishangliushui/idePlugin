@@ -4,58 +4,68 @@ package org.yishang.action;
 import com.alibaba.fastjson.JSON;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.yishang.StatisticsData;
-import org.yishang.persistent.UITimesState;
+import org.yishang.bean.Statistics;
 import org.yishang.util.SingletonUtil;
 import org.yishang.util.WindowUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class TimerMasterOutputAction extends AnAction {
 
-	private UITimesState uiTimesState = ApplicationManager.getApplication().getService(UITimesState.class);
+	//private UITimesState uiTimesState = ApplicationManager.getApplication().getService(UITimesState.class);
 
 	@Override
 	public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-		StatisticsData statisticsData = SingletonUtil.getInstance();
-		// 获取今日数据
+		//StatisticsData statisticsData = SingletonUtil.getInstance();
+		Statistics statistics = SingletonUtil.readStatisticsFile();
+		StatisticsData statisticsData = JSON.parseObject(statistics.getStatisticsData(), StatisticsData.class);
+//		// 获取今日数据
 		StringBuilder stringBuilder = new StringBuilder();
 		String today = String.format("🐻 (%s)%s%s", statisticsData.getCreateDate(), System.lineSeparator(), getBodyContent(statisticsData));
 		stringBuilder.append(today).append(System.lineSeparator());
 		// 对历史数据进行倒序排序
 		//WindowUtil.consoleInfo(anActionEvent.getProject(), today);
-		List<String> historyData = JSON.parseObject(uiTimesState.getHistoryData(), List.class);
-		List<StatisticsData> historyDataList = historyData.stream().map(s -> JSON.parseObject(s, StatisticsData.class)).sorted((o1, o2) -> o2.getCreateDate().compareTo(o1.getCreateDate())).collect(Collectors.toList());
-		for (StatisticsData data : historyDataList) {
-			String format = String.format("🐻 (%s)%s%s", data.getCreateDate(), System.lineSeparator(), getBodyContent(data));
-			//WindowUtil.consoleInfo(anActionEvent.getProject(), format);
-			stringBuilder.append(format).append(System.lineSeparator());
-		}
+		List<StatisticsData> historyDataList = new ArrayList<>();
+		if (StringUtils.isNotBlank(statistics.getHistoryDataList())) {
+			List<String> historyData = JSON.parseObject(statistics.getHistoryDataList(), List.class);
+			historyDataList = historyData.stream().map(s -> JSON.parseObject(s, StatisticsData.class)).sorted((o1, o2) -> o2.getCreateDate().compareTo(o1.getCreateDate())).collect(Collectors.toList());
+			for (StatisticsData data : historyDataList) {
+				String format = String.format("🐻 (%s)%s%s", data.getCreateDate(), System.lineSeparator(), getBodyContent(data));
+				//WindowUtil.consoleInfo(anActionEvent.getProject(), format);
+				stringBuilder.append(format).append(System.lineSeparator());
+			}
 
-		if (!historyDataList.isEmpty()) {
-			StatisticsData data = historyDataList.get(0);
-			if (data.getCreateDate().equals(statisticsData.getCreateDate())) {
-				data.getActiveTime().addAndGet(statisticsData.getActiveTime().longValue());
-				data.getKeyCount().addAndGet(statisticsData.getKeyCount().longValue());
-				data.getAddLineCount().addAndGet(statisticsData.getAddLineCount().longValue());
-				data.getRemoveLineCount().addAndGet(statisticsData.getRemoveLineCount().longValue());
-				data.getPasteCount().addAndGet(statisticsData.getPasteCount().longValue());
-				data.getRunTime().addAndGet(statisticsData.getRunTime().longValue());
-				data.getPushCount().addAndGet(statisticsData.getPushCount().longValue());
+			if (!historyDataList.isEmpty()) {
+				StatisticsData data = historyDataList.get(0);
+				if (data.getCreateDate().equals(statisticsData.getCreateDate())) {
+					data.getActiveTime().addAndGet(statisticsData.getActiveTime().longValue());
+					data.getKeyCount().addAndGet(statisticsData.getKeyCount().longValue());
+					data.getAddLineCount().addAndGet(statisticsData.getAddLineCount().longValue());
+					data.getRemoveLineCount().addAndGet(statisticsData.getRemoveLineCount().longValue());
+					data.getPasteCount().addAndGet(statisticsData.getPasteCount().longValue());
+					data.getRunTime().addAndGet(statisticsData.getRunTime().longValue());
+					data.getPushCount().addAndGet(statisticsData.getPushCount().longValue());
+				} else {
+					historyDataList.add(statisticsData);
+				}
 			} else {
 				historyDataList.add(statisticsData);
 			}
 		} else {
 			historyDataList.add(statisticsData);
 		}
-		StatisticsData statistics = statistics(historyDataList, null);
-		String last = String.format("🐲 Average of Day%s%s", System.lineSeparator(), getBodyContent(statistics));
+
+		StatisticsData statisticsList = statistics(historyDataList, null);
+		String last = String.format("🐲 Average of Day%s%s", System.lineSeparator(), getBodyContent(statisticsList));
 		stringBuilder.append(last).append(System.lineSeparator());
 		WindowUtil.consoleInfo(anActionEvent.getProject(), stringBuilder.toString());
+
 	}
 
 	private String getBodyContent(StatisticsData statisticsData) {

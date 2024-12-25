@@ -1,14 +1,12 @@
 package org.yishang.listener;
 
-import com.alibaba.fastjson.JSON;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
+import cn.hutool.core.util.XmlUtil;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.startup.ProjectActivity;
-import com.intellij.notification.Notification;
 import com.intellij.openapi.wm.WindowManager;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -16,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yishang.StatisticsData;
+import org.yishang.bean.Constant;
+import org.yishang.bean.Statistics;
 import org.yishang.persistent.UITimesState;
 import org.yishang.util.DateUtil;
 import org.yishang.util.SingletonUtil;
@@ -23,17 +23,17 @@ import org.yishang.util.StringUtil;
 import org.yishang.util.WindowUtil;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-/**
- * 统计计数告警
- */
 public class ProjectStartListener implements ProjectActivity {
 	private UITimesState uiTimesState = ApplicationManager.getApplication().getService(UITimesState.class);
 	private Thread alarmMonitoringThread;
@@ -43,6 +43,50 @@ public class ProjectStartListener implements ProjectActivity {
 	@Nullable
 	@Override
 	public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
+		// 项目启动检测文件
+		try {
+			String fileName = PathManager.getConfigPath() + File.separator + Constant.FILE_NAME;
+			File file = new File(fileName);
+			if (!file.exists()) {
+				boolean newFile = file.createNewFile();
+				if (!newFile) {
+					WindowUtil.consoleError(project, "插件创建文件失败");
+				} else {
+					RandomAccessFile randomAccessFile = null;
+					try {
+						randomAccessFile = new RandomAccessFile(fileName, "rw");
+						FileChannel channel = randomAccessFile.getChannel();
+						FileLock lock = channel.lock();
+						try {
+							// 读取文件内容并解析为 StatisticsData 对象
+							randomAccessFile.seek(0); // 移动到文件开头
+							Statistics statistics = new Statistics();
+							statistics.setRunProjectPath(project.getBasePath());
+							randomAccessFile.writeBytes(XmlUtil.format(XmlUtil.beanToXml(statistics)));
+							randomAccessFile.setLength(randomAccessFile.getFilePointer()); // 截断文件以移除多余数据
+						} finally {
+							// 确保锁被释放
+							lock.release();
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					} finally {
+						try {
+							if (randomAccessFile != null) {
+								randomAccessFile.close();
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			WindowUtil.consoleError(project, e.getMessage());
+		}
+
 		alarmMonitoringThread = new Thread(() -> {
 			Integer accumulatedActiveTime = 0;
 			Integer count = 0;
@@ -156,40 +200,30 @@ public class ProjectStartListener implements ProjectActivity {
 					JFrame frame = WindowManager.getInstance().getFrame(project);
 
 					boolean active = frame.isActive();
-
-					if (Objects.equals(uiTimesState.getRunProjectPath(), projectPath)
-								|| uiTimesState.getRunProjectPath().isBlank()
-								|| firstOrNull == null) {
-
+					StatisticsData statisticsData = SingletonUtil.getInstance();
+					if (Objects.equals(statisticsData.getRunProjectPath(), projectPath)
+							|| statisticsData.getRunProjectPath().isBlank()
+							|| firstOrNull == null) {
+						if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
+							statisticsData.getRunTime().addAndGet(updateInterval);
+						} else {
+							SingletonUtil.writeStatistics(uiTimesState.getMaxHistoryDay());
+							statisticsData.getRunTime().addAndGet(updateInterval);
+						}
 					}
 					// 修改判断条件
 					if (active) {
-						uiTimesState.setRunProjectPath(projectPath);
-						StatisticsData statisticsData = SingletonUtil.getInstance();
+						statisticsData.setRunProjectPath(projectPath);
 //						String message = String.format("runProjectPath=%s \n,projectPath=%s \n,active=%s \n," +
 //								"firstOrNull=%s \n, active=%s \n, " +
 //								"runtime=%s \n, createDate=%s \n,", uiTimesState.getRunProjectPath(), projectPath, active, firstOrNull, statisticsData.getActiveTime(), statisticsData.getRunTime(), statisticsData.getCreateDate());
 //						WindowUtil.consoleError(project, message);
-						//
 						if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
-							//statisticsData.getRunTime().addAndGet(updateInterval);
 							statisticsData.getActiveTime().addAndGet(activeInterval);
-							uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
+							//uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
 						} else {
-							Integer historySize = StringUtils.isBlank(uiTimesState.getMaxHistoryDay()) ? 365 : Integer.parseInt(uiTimesState.getMaxHistoryDay());
-							List<String> historyData = JSON.parseObject(uiTimesState.getHistoryData(), List.class);
-							if (historyData.size() != 0 && historyData.size() >= historySize) {
-								// 大于保持的最大天数删除第一个
-								historyData.remove(0);
-							}
-
-							historyData.add(JSON.toJSONString(SingletonUtil.getInstance()));
-							uiTimesState.setHistoryData(JSON.toJSONString(historyData));
-
-							StatisticsData newData = SingletonUtil.getClearStatisticsData();
-							newData.getRunTime().addAndGet(updateInterval);
-							newData.getActiveTime().addAndGet(activeInterval);
-							//uiTimesState.setStatisticsData(JSON.toJSONString(newData));
+							SingletonUtil.writeStatistics(uiTimesState.getMaxHistoryDay());
+							statisticsData.getRunTime().addAndGet(updateInterval);
 						}
 					}
 				} catch (Exception e) {
@@ -218,6 +252,11 @@ public class ProjectStartListener implements ProjectActivity {
 					if (statisticsMonitoringThread != null) {
 						statisticsMonitoringThread.interrupt();
 					}
+					if (SingletonUtil.thread != null) {
+						// 关闭时执行一遍
+						SingletonUtil.runStatisticsFile();
+					}
+
 				}
 			}
 		});

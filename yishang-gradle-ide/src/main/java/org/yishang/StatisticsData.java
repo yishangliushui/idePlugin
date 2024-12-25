@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class StatisticsData {
 
+	// 运行项目路径
+	private String runProjectPath = "";
 	private volatile AtomicLong runTime = new AtomicLong(0L);
 	private volatile AtomicLong activeTime = new AtomicLong(0L);
 	private volatile AtomicLong keyCount = new AtomicLong(0L);
@@ -87,5 +89,13 @@ public class StatisticsData {
 
 	public void setCreateDate(String createDate) {
 		this.createDate = createDate;
+	}
+
+	public String getRunProjectPath() {
+		return runProjectPath;
+	}
+
+	public void setRunProjectPath(String runProjectPath) {
+		this.runProjectPath = runProjectPath;
 	}
 }

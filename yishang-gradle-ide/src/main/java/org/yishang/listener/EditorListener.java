@@ -1,7 +1,6 @@
 package org.yishang.listener;
 
 
-import com.alibaba.fastjson.JSON;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.event.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -63,7 +62,7 @@ public class EditorListener implements EditorFactoryListener, BulkAwareDocumentL
 	public void caretPositionChanged(@NotNull CaretEvent event) {
 		// 鼠标移动就赋值.
 		//state.statisticsData = Utils.stringify(Utils.initData())
-		uiTimesState.setStatisticsData(JSON.toJSONString(SingletonUtil.getInstance()));
+		//uiTimesState.setStatisticsData(JSON.toJSONString(SingletonUtil.getInstance()));
 	}
 
 	// 辅助方法：计算字符串中某个字符出现的次数

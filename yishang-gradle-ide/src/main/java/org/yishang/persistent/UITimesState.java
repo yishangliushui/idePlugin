@@ -1,7 +1,9 @@
 package org.yishang.persistent;
 
-import com.intellij.openapi.components.*;
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.Service;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,41 +21,39 @@ public final class UITimesState implements PersistentStateComponent<UITimesState
 	//private Long activeInterval;
 	//private Long updateInterval;
 
-	private Long activeTime = Long.MAX_VALUE;
-
 	// 运行项目路径
-	private String runProjectPath = "";
+	//private String runProjectPath = "";
 
-	// 当日统计数据
-	private String statisticsData = "{}";
+//	// 当日统计数据
+//	private String statisticsData = "{}";
+//
+//	// 历史数据
+//	private String historyData = "[]";
 
-	// 历史数据
-	private String historyData = "[]";
 
+//	public String getRunProjectPath() {
+//		return runProjectPath;
+//	}
+//
+//	public void setRunProjectPath(String runProjectPath) {
+//		this.runProjectPath = runProjectPath;
+//	}
 
-	public String getRunProjectPath() {
-		return runProjectPath;
-	}
-
-	public void setRunProjectPath(String runProjectPath) {
-		this.runProjectPath = runProjectPath;
-	}
-
-	public String getStatisticsData() {
-		return statisticsData;
-	}
-
-	public void setStatisticsData(String statisticsData) {
-		this.statisticsData = statisticsData;
-	}
-
-	public String getHistoryData() {
-		return historyData;
-	}
-
-	public void setHistoryData(String historyData) {
-		this.historyData = historyData;
-	}
+//	public String getStatisticsData() {
+//		return statisticsData;
+//	}
+//
+//	public void setStatisticsData(String statisticsData) {
+//		this.statisticsData = statisticsData;
+//	}
+//
+//	public String getHistoryData() {
+//		return historyData;
+//	}
+//
+//	public void setHistoryData(String historyData) {
+//		this.historyData = historyData;
+//	}
 
 	@Override
 	public @Nullable UITimesState getState() {
@@ -89,13 +89,6 @@ public final class UITimesState implements PersistentStateComponent<UITimesState
 		this.maxHistoryDay = maxHistoryDay;
 	}
 
-	public Long getActiveTime() {
-		return activeTime;
-	}
-
-	public void setActiveTime(Long activeTime) {
-		this.activeTime = activeTime;
-	}
 //
 //	public void setUpdateInterval(Long updateInterval) {
 //		this.updateInterval = updateInterval;

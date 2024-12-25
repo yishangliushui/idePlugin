@@ -36,6 +36,10 @@ dependencies {
 
     implementation("com.alibaba:fastjson:1.2.83")
 
+//    implementation("dom4j:dom4j:1.6.1")
+
+    implementation("cn.hutool:hutool-all:5.8.0")
+
     // Swagger
     compileOnly("io.springfox:springfox-swagger2:2.8.0")
 
