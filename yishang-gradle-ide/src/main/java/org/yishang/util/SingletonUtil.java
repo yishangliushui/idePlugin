@@ -15,6 +15,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -46,6 +47,9 @@ public class SingletonUtil {
 						Statistics statistics = readStatisticsFile();
 						statisticsData = new StatisticsData();
 						statistics.setRunProjectPath(statistics.getRunProjectPath());
+						if (StringUtils.isNotBlank(statistics.getStatisticsData())){
+							statisticsData.setCreateDate(JSON.parseObject(statistics.getStatisticsData(), StatisticsData.class).getCreateDate());
+						}
 						// 启动线程，定时保存数据
 						//UITimesState uiTimesState = ApplicationManager.getApplication().getService(UITimesState.class);
 						if (thread == null) {
@@ -211,16 +215,23 @@ public class SingletonUtil {
 				Statistics statistics = XmlUtil.xmlToBean(document, Statistics.class);
 
 				Integer historySize = StringUtils.isBlank(maxHistoryDay) ? 365 : Integer.parseInt(maxHistoryDay);
-				List<String> historyData = JSON.parseObject(statistics.getHistoryDataList(), List.class);
+				List<String> historyData;
+				if (StringUtils.isNotBlank(statistics.getHistoryDataList())){
+					historyData = JSON.parseObject(statistics.getHistoryDataList(), List.class);
+				}else {
+					historyData = new ArrayList<>();
+				}
 				if (!historyData.isEmpty() && historyData.size() >= historySize) {
 					// 大于保持的最大天数删除第一个
 					historyData.remove(0);
 				}
 
-				historyData.add(JSON.toJSONString(SingletonUtil.getInstance()));
+				StatisticsData statisticsData = SingletonUtil.getInstance();
+				historyData.add(JSON.toJSONString(statisticsData));
 				statistics.setHistoryDataList(JSON.toJSONString(historyData));
-				statistics.setStatisticsData(JSON.toJSONString(SingletonUtil.getInstance()));
-				statistics.setRunProjectPath(SingletonUtil.getInstance().getRunProjectPath());
+				statisticsData.setCreateDate(DateUtil.getCurDate());
+				statistics.setStatisticsData(JSON.toJSONString(statisticsData));
+				statistics.setRunProjectPath(statisticsData.getRunProjectPath());
 
 				// 将更新后的 StatisticsData 转换为 XML 字符串
 				// 重新写入内容

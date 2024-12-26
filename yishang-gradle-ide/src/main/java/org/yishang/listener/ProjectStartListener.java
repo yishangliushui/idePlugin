@@ -204,6 +204,7 @@ public class ProjectStartListener implements ProjectActivity {
 					if (Objects.equals(statisticsData.getRunProjectPath(), projectPath)
 							|| statisticsData.getRunProjectPath().isBlank()
 							|| firstOrNull == null) {
+//						System.out.println("123"+ statisticsData.getRunProjectPath());
 						if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
 							statisticsData.getRunTime().addAndGet(updateInterval);
 						} else {
@@ -211,13 +212,14 @@ public class ProjectStartListener implements ProjectActivity {
 							statisticsData.getRunTime().addAndGet(updateInterval);
 						}
 					}
+//					String message = String.format("runProjectPath=%s \n,projectPath=%s \n,active=%s \n," +
+//							"firstOrNull=%s \n, active=%s \n, " +
+//							"runtime=%s \n, createDate=%s \n," +
+//							"地址：%s", statisticsData.getRunProjectPath(), projectPath, active, firstOrNull, statisticsData.getActiveTime().longValue(), statisticsData.getRunTime().longValue(), statisticsData.getCreateDate(), statisticsData);
+//					WindowUtil.consoleError(project, message);
 					// 修改判断条件
 					if (active) {
 						statisticsData.setRunProjectPath(projectPath);
-//						String message = String.format("runProjectPath=%s \n,projectPath=%s \n,active=%s \n," +
-//								"firstOrNull=%s \n, active=%s \n, " +
-//								"runtime=%s \n, createDate=%s \n,", uiTimesState.getRunProjectPath(), projectPath, active, firstOrNull, statisticsData.getActiveTime(), statisticsData.getRunTime(), statisticsData.getCreateDate());
-//						WindowUtil.consoleError(project, message);
 						if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
 							statisticsData.getActiveTime().addAndGet(activeInterval);
 							//uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
@@ -252,11 +254,14 @@ public class ProjectStartListener implements ProjectActivity {
 					if (statisticsMonitoringThread != null) {
 						statisticsMonitoringThread.interrupt();
 					}
-					if (SingletonUtil.thread != null) {
-						// 关闭时执行一遍
-						SingletonUtil.runStatisticsFile();
+					// 多个项目关闭后才进行关闭
+					Project[] openProjects = ProjectManager.getInstance().getOpenProjects();
+					if (openProjects.length == 0) {
+						if (SingletonUtil.thread != null) {
+							// 关闭时执行一遍
+							SingletonUtil.runStatisticsFile();
+						}
 					}
-
 				}
 			}
 		});

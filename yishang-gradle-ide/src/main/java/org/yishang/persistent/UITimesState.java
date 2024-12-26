@@ -5,6 +5,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,7 +83,7 @@ public final class UITimesState implements PersistentStateComponent<UITimesState
 	}
 
 	public String getMaxHistoryDay() {
-		return maxHistoryDay;
+		return StringUtils.isBlank(maxHistoryDay) ? "365" : maxHistoryDay;
 	}
 
 	public void setMaxHistoryDay(String maxHistoryDay) {
