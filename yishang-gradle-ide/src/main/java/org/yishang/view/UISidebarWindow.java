@@ -26,7 +26,6 @@ public class UISidebarWindow implements ToolWindowFactory {
 	@Override
 	public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 		toolWindow.getContentManager().addContent(ContentFactory.getInstance().createContent(mainPanel, "", false));
-
 //		mybatisGenerator.getMysqlAddress().setText(generateState.getMysqlAddress());
 //		mybatisGenerator.getUserName().setText(generateState.getUserName());
 //		mybatisGenerator.getPassword().setText(generateState.getPassword());
