@@ -225,9 +225,14 @@ public class SingletonUtil {
 					// 大于保持的最大天数删除第一个
 					historyData.remove(0);
 				}
-
 				StatisticsData statisticsData = SingletonUtil.getInstance();
-				historyData.add(JSON.toJSONString(statisticsData));
+				StatisticsData statisticsDataFile;
+				if (StringUtils.isNotBlank(statistics.getStatisticsData())){
+					statisticsDataFile = JSON.parseObject(statistics.getStatisticsData(), StatisticsData.class);
+				}else {
+					statisticsDataFile = statisticsData;
+				}
+				historyData.add(JSON.toJSONString(statisticsDataFile));
 				statistics.setHistoryDataList(JSON.toJSONString(historyData));
 				statisticsData.setCreateDate(DateUtil.getCurDate());
 				statistics.setStatisticsData(JSON.toJSONString(statisticsData));
