@@ -9,7 +9,6 @@ public class TEST extends AnAction {
 
 	@Override
 	public void actionPerformed(AnActionEvent e) {
-		// TODO: insert action logic here
 		Messages.showInfoMessage("1111", "Hello World");
 	}
 }
