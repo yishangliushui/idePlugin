@@ -9,6 +9,6 @@ public class TEST extends AnAction {
 
 	@Override
 	public void actionPerformed(AnActionEvent e) {
-		Messages.showInfoMessage("1111", "Hello World");
+		Messages.showInfoMessage("你吃了吗？", "每日问候");
 	}
 }
