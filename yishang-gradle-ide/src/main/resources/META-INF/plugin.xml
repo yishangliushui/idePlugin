@@ -78,6 +78,10 @@
                 anchor="right"
                 factoryClass="org.yishang.view.UISidebarWindow"
                 icon="org.yishang.PluginIcons.ICON_13"/>
+
+    <toolWindow id="LinesCode"
+                anchor="bottom"
+                factoryClass="org.yishang.view.CountLinesCodeWindow"/>
   </extensions>
 
   <!--方法和行为都在这里-->

@@ -70,21 +70,21 @@ public class TimerMasterOutputAction extends AnAction {
 
 	private String getBodyContent(StatisticsData statisticsData) {
 		StringBuilder stringBuilder = new StringBuilder();
-		long runTime = statisticsData.getRunTime().longValue() / (3600 * 1000);
+		double runTime = (double) statisticsData.getRunTime().longValue() / (3600 * 1000);
 		String runTimeStr = "小时";
-		if (runTime == 0) {
-			runTime = statisticsData.getRunTime().longValue() / (60 * 1000);
+		if (runTime < 1) {
+			runTime = (double) statisticsData.getRunTime().longValue() / (60 * 1000);
 			runTimeStr = "分钟";
 		}
 
-		long activeTime = statisticsData.getActiveTime().longValue() / (3600 * 1000);
+		double activeTime = (double) statisticsData.getActiveTime().longValue() / (3600 * 1000);
 		String activeTimeStr = "小时";
-		if (activeTime == 0) {
-			activeTime = statisticsData.getActiveTime().longValue() / (60 * 1000);
+		if (activeTime < 1) {
+			activeTime =  (double) statisticsData.getActiveTime().longValue() / (60 * 1000);
 			activeTimeStr = "分钟";
 		}
-		stringBuilder.append("编辑器使用时间: ").append(runTime).append(runTimeStr).append("\n");
-		stringBuilder.append("编辑器活跃时间: ").append(activeTime).append(activeTimeStr).append("\n");
+		stringBuilder.append("编辑器使用时间: ").append(String.format("%.2f", runTime)).append(runTimeStr).append("\n");
+		stringBuilder.append("编辑器活跃时间: ").append(String.format("%.2f", activeTime)).append(activeTimeStr).append("\n");
 		stringBuilder.append("添加的代码行数: ").append(statisticsData.getAddLineCount()).append("\n");
 		stringBuilder.append("删除的代码行数: ").append(statisticsData.getRemoveLineCount()).append("\n");
 		stringBuilder.append("总的键入数: ").append(statisticsData.getKeyCount()).append("\n");
