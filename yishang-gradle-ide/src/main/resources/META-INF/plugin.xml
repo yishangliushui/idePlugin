@@ -74,20 +74,20 @@
                 anchor="bottom"
                 icon="org.yishang.PluginIcons.ICON_13"/>
 
-    <toolWindow id="mybatisGenerator"
+    <toolWindow id="Tools"
                 anchor="right"
                 factoryClass="org.yishang.view.UISidebarWindow"
                 icon="org.yishang.PluginIcons.ICON_13"/>
 
-    <toolWindow id="LinesCode"
-                anchor="bottom"
-                factoryClass="org.yishang.view.CountLinesCodeWindow"/>
+    <!--    <toolWindow id="LinesCode"-->
+    <!--                anchor="bottom"-->
+    <!--                factoryClass="org.yishang.view.CountLinesCodeWindow"/>-->
   </extensions>
 
   <!--方法和行为都在这里-->
   <actions>
     <!-- Add your actions here -->
-    <action id="TEST" class="org.yishang.action.TEST" text="TEST" description="TEST">
+    <action id="GoodDay" class="org.yishang.action.GoodDay" text="每日问候">
       <add-to-group group-id="EditorPopupMenu" anchor="first"/>
     </action>
     <action id="StructureTEST" class="org.yishang.action.StructureTEST" text="StructureTEST"

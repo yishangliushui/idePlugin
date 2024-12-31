@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.yishang.StatisticsData;
+import org.yishang.bean.Constant;
 import org.yishang.bean.Statistics;
 import org.yishang.util.SingletonUtil;
 import org.yishang.util.WindowUtil;
@@ -64,7 +65,7 @@ public class TimerMasterOutputAction extends AnAction {
 		StatisticsData statisticsList = statistics(historyDataList, null);
 		String last = String.format("🐲 Average of Day%s%s", System.lineSeparator(), getBodyContent(statisticsList));
 		stringBuilder.append(last).append(System.lineSeparator());
-		WindowUtil.consoleInfo(anActionEvent.getProject(), stringBuilder.toString());
+		WindowUtil.consoleInfo(anActionEvent.getProject(), stringBuilder.toString(), Constant.TIMER_MASTER_CONTROL_TITLE);
 
 	}
 
@@ -80,7 +81,7 @@ public class TimerMasterOutputAction extends AnAction {
 		double activeTime = (double) statisticsData.getActiveTime().longValue() / (3600 * 1000);
 		String activeTimeStr = "小时";
 		if (activeTime < 1) {
-			activeTime =  (double) statisticsData.getActiveTime().longValue() / (60 * 1000);
+			activeTime = (double) statisticsData.getActiveTime().longValue() / (60 * 1000);
 			activeTimeStr = "分钟";
 		}
 		stringBuilder.append("编辑器使用时间: ").append(String.format("%.2f", runTime)).append(runTimeStr).append("\n");

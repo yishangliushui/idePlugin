@@ -36,13 +36,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ProjectStartListener implements ProjectActivity {
 	private UITimesState uiTimesState = ApplicationManager.getApplication().getService(UITimesState.class);
-	private Thread alarmMonitoringThread;
-	private Thread statisticsMonitoringThread;
-	private AtomicBoolean running = new AtomicBoolean(true);
+	private Map<String, Thread> threadMap = new HashMap<>();
+	private Map<String, AtomicBoolean> rungingMap = new HashMap<>();
 
 	@Nullable
 	@Override
 	public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
+		// 开启线程
+		rungingMap.put(project.getLocationHash(), new AtomicBoolean(true));
+
 		// 项目启动检测文件
 		try {
 			String fileName = PathManager.getConfigPath() + File.separator + Constant.FILE_NAME;
@@ -87,173 +89,184 @@ public class ProjectStartListener implements ProjectActivity {
 			WindowUtil.consoleError(project, e.getMessage());
 		}
 
-		alarmMonitoringThread = new Thread(() -> {
-			Integer accumulatedActiveTime = 0;
-			Integer count = 0;
-			Long lastUpdateTime = System.currentTimeMillis();
-			String spacedNotifityMsg = "您已经工作了%s分钟，请休息一下！";
-			Map<String, String> configMap = new HashMap<>();
-			while (running.get()) {
-				configMap.clear();
-				String alarmRule = uiTimesState.getAlarmRule();
-				LocalTime now = LocalTime.now();
-				// 转换为从午夜开始的毫秒数
-				Integer secondOfDay = now.toSecondOfDay();
-				if (StringUtils.isNotBlank(alarmRule)) {
-					Map<String, String> parseMap = StringUtil.parseConfigWithRegex(alarmRule);
-					for (Map.Entry<String, String> entry : parseMap.entrySet()) {
-						if ("spacedNotifityMsg".equals(entry.getKey().trim())) {
-							spacedNotifityMsg = parseMap.getOrDefault("spacedNotifityMsg", "").trim();
-							continue;
-						}
-						Integer toMillis = DateUtil.parseTimeToMillis(entry.getKey().trim());
-						if (toMillis != null) {
-							configMap.put(entry.getKey(), entry.getValue().trim());
-							continue;
+		if (null == threadMap.get(Constant.ALARM_MONITORING_THREAD + project.getLocationHash())) {
+			Thread alarmMonitoringThread;
+			alarmMonitoringThread = new Thread(() -> {
+				Integer accumulatedActiveTime = 0;
+				Integer count = 0;
+				Long lastUpdateTime = System.currentTimeMillis();
+				String spacedNotifityMsg = "您已经工作了%s分钟，请休息一下！";
+				Map<String, String> configMap = new HashMap<>();
+				while (rungingMap.get(project.getLocationHash()).get()) {
+					configMap.clear();
+					String alarmRule = uiTimesState.getAlarmRule();
+					LocalTime now = LocalTime.now();
+					// 转换为从午夜开始的毫秒数
+					Integer secondOfDay = now.toSecondOfDay();
+					if (StringUtils.isNotBlank(alarmRule)) {
+						Map<String, String> parseMap = StringUtil.parseConfigWithRegex(alarmRule);
+						for (Map.Entry<String, String> entry : parseMap.entrySet()) {
+							if ("spacedNotifityMsg".equals(entry.getKey().trim())) {
+								spacedNotifityMsg = parseMap.getOrDefault("spacedNotifityMsg", "").trim();
+								continue;
+							}
+							Integer toMillis = DateUtil.parseTimeToMillis(entry.getKey().trim());
+							if (toMillis != null) {
+								configMap.put(entry.getKey(), entry.getValue().trim());
+								continue;
+							}
+
 						}
 
 					}
 
-				}
+					// 固定时间告警
+					for (Map.Entry<String, String> entry : configMap.entrySet()) {
+						// 计算当前是否在告警时间范围内
+						try {
+							Integer toMillis = DateUtil.parseTimeToMillis(entry.getKey().trim());
 
-				// 固定时间告警
-				for (Map.Entry<String, String> entry : configMap.entrySet()) {
-					// 计算当前是否在告警时间范围内
-					try {
-						Integer toMillis = DateUtil.parseTimeToMillis(entry.getKey().trim());
+							if (secondOfDay.equals(toMillis) || ((secondOfDay) >= (toMillis - 1) && (secondOfDay) <= (toMillis + 1))) {
+								JOptionPane.showMessageDialog(null, entry.getValue(), "休息提示", JOptionPane.INFORMATION_MESSAGE);
+							}
 
-						if (secondOfDay.equals(toMillis) || ((secondOfDay) >= (toMillis - 1) && (secondOfDay) <= (toMillis + 1))) {
-							JOptionPane.showMessageDialog(null, entry.getValue(), "休息提示", JOptionPane.INFORMATION_MESSAGE);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
+					}
 
+					// 常规通知告警
+					try {
+						Integer alarmTime = null;
+						if (uiTimesState.getAlarmTime() != null && StringUtils.isNotBlank(uiTimesState.getAlarmTime())) {
+							alarmTime = Integer.parseInt(uiTimesState.getAlarmTime());
+						} else {
+							alarmTime = 1800;
+						}
+						// 获取当前项目的主窗口
+						// 判断当前ide是否处于活跃状态
+						JFrame ideFrame = WindowManager.getInstance().getFrame(project);
+						if (ideFrame != null && ideFrame.isActive()) {
+							accumulatedActiveTime += 1;
+						}
+						if (accumulatedActiveTime != 0 && accumulatedActiveTime >= alarmTime) {
+							// 弹出提示框，提示用户是否需要休息
+							if (count < 3) {
+								count += 1;
+								if (spacedNotifityMsg.contains("%s")) {
+									spacedNotifityMsg = String.format(spacedNotifityMsg, accumulatedActiveTime / 60);
+								}
+								JOptionPane.showMessageDialog(null, spacedNotifityMsg, "休息提示", JOptionPane.INFORMATION_MESSAGE);
+							}
+							long currentTimeMillis = System.currentTimeMillis();
+							if (currentTimeMillis - lastUpdateTime >= 60000) {
+								count = 0;
+								lastUpdateTime = currentTimeMillis;
+							}
+							accumulatedActiveTime = 0;
+						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
 
-				// 常规通知告警
-				try {
-					Integer alarmTime = null;
-					if (uiTimesState.getAlarmTime() != null && StringUtils.isNotBlank(uiTimesState.getAlarmTime())) {
-						alarmTime = Integer.parseInt(uiTimesState.getAlarmTime());
-					} else {
-						alarmTime = 1800;
+
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt(); // 重新设置中断状态
 					}
-					// 获取当前项目的主窗口
-					// 判断当前ide是否处于活跃状态
-					JFrame ideFrame = WindowManager.getInstance().getFrame(project);
-					if (ideFrame != null && ideFrame.isActive()) {
-						accumulatedActiveTime += 1;
-					}
-					if (accumulatedActiveTime != 0 && accumulatedActiveTime >= alarmTime) {
-						// 弹出提示框，提示用户是否需要休息
-						if (count < 3) {
-							count += 1;
-							if (spacedNotifityMsg.contains("%s")) {
-								spacedNotifityMsg = String.format(spacedNotifityMsg, accumulatedActiveTime / 60);
+				}
+			});
+			alarmMonitoringThread.start();
+			threadMap.put(Constant.ALARM_MONITORING_THREAD + project.getLocationHash(), alarmMonitoringThread);
+		}
+
+		if (null == threadMap.get(Constant.STATISTICS_MONITORING_THREAD + project.getLocationHash())) {
+			Thread statisticsMonitoringThread;
+			statisticsMonitoringThread = new Thread(() -> {
+				Long activeInterval = 2000L;
+				Long updateInterval = 2000L;
+				while (rungingMap.get(project.getLocationHash()).get()) {
+					// 判断编辑器是否处于活跃状态
+					//Long activeInterval = (null == uiTimesState.getActiveInterval() ? 30 * 1000 : uiTimesState.getActiveInterval()) * 1000;
+					//Long updateInterval = (null == uiTimesState.getUpdateInterval() ? 30 * 1000 : uiTimesState.getUpdateInterval()) * 1000;
+					try {
+						// 避免多个项目运行时间统计多次, 增加满足以下规则才进行时间统计:
+						// 当前项目与配置信息一致, 或配置信息为空, 或配置信息内的项目不处于打开状态
+						String projectPath = project.getLocationHash();
+						//String projectPath = project.getProjectFilePath();
+						String firstOrNull = null;
+						@NotNull Project[] openProjects = ProjectManager.getInstance().getOpenProjects();
+						for (Project openProject : openProjects) {
+							String locationHash = openProject.getLocationHash();
+							if (locationHash.equals(projectPath)) {
+								firstOrNull = locationHash;
+								break;
 							}
-							JOptionPane.showMessageDialog(null, spacedNotifityMsg, "休息提示", JOptionPane.INFORMATION_MESSAGE);
 						}
-						long currentTimeMillis = System.currentTimeMillis();
-						if (currentTimeMillis - lastUpdateTime >= 60000) {
-							count = 0;
-							lastUpdateTime = currentTimeMillis;
-						}
-						accumulatedActiveTime = 0;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+						// 获取当前
+						JFrame frame = WindowManager.getInstance().getFrame(project);
 
-
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt(); // 重新设置中断状态
-				}
-			}
-		});
-		alarmMonitoringThread.start();
-
-		statisticsMonitoringThread = new Thread(() -> {
-			Long activeInterval = 2000L;
-			Long updateInterval = 2000L;
-			while (running.get()) {
-				// 判断编辑器是否处于活跃状态
-				//Long activeInterval = (null == uiTimesState.getActiveInterval() ? 30 * 1000 : uiTimesState.getActiveInterval()) * 1000;
-				//Long updateInterval = (null == uiTimesState.getUpdateInterval() ? 30 * 1000 : uiTimesState.getUpdateInterval()) * 1000;
-				try {
-					// 避免多个项目运行时间统计多次, 增加满足以下规则才进行时间统计:
-					// 当前项目与配置信息一致, 或配置信息为空, 或配置信息内的项目不处于打开状态
-					String projectPath = project.getLocationHash();
-					//String projectPath = project.getProjectFilePath();
-					String firstOrNull = null;
-					@NotNull Project[] openProjects = ProjectManager.getInstance().getOpenProjects();
-					for (Project openProject : openProjects) {
-						String locationHash = openProject.getLocationHash();
-						if (locationHash.equals(projectPath)) {
-							firstOrNull = locationHash;
-							break;
-						}
-					}
-					// 获取当前
-					JFrame frame = WindowManager.getInstance().getFrame(project);
-
-					boolean active = frame.isActive();
-					StatisticsData statisticsData = SingletonUtil.getInstance();
-					if (Objects.equals(statisticsData.getRunProjectPath(), projectPath)
-							|| statisticsData.getRunProjectPath().isBlank()
-							|| firstOrNull == null) {
+						boolean active = frame.isActive();
+						StatisticsData statisticsData = SingletonUtil.getInstance();
+						if (Objects.equals(statisticsData.getRunProjectPath(), projectPath)
+								|| statisticsData.getRunProjectPath().isBlank()
+								|| firstOrNull == null) {
 //						System.out.println("123"+ statisticsData.getRunProjectPath());
-						if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
-							statisticsData.getRunTime().addAndGet(updateInterval);
-						} else {
-							SingletonUtil.writeStatistics(uiTimesState.getMaxHistoryDay());
-							statisticsData.getRunTime().addAndGet(updateInterval);
+							if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
+								statisticsData.getRunTime().addAndGet(updateInterval);
+							} else {
+								SingletonUtil.writeStatistics(uiTimesState.getMaxHistoryDay());
+								statisticsData.getRunTime().addAndGet(updateInterval);
+							}
 						}
-					}
 //					String message = String.format("runProjectPath=%s \n,projectPath=%s \n,active=%s \n," +
 //							"firstOrNull=%s \n, active=%s \n, " +
 //							"runtime=%s \n, createDate=%s \n," +
 //							"地址：%s", statisticsData.getRunProjectPath(), projectPath, active, firstOrNull, statisticsData.getActiveTime().longValue(), statisticsData.getRunTime().longValue(), statisticsData.getCreateDate(), statisticsData);
 //					WindowUtil.consoleError(project, message);
-					// 修改判断条件
-					if (active) {
-						statisticsData.setRunProjectPath(projectPath);
-						if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
-							statisticsData.getActiveTime().addAndGet(activeInterval);
-							//uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
-						} else {
-							SingletonUtil.writeStatistics(uiTimesState.getMaxHistoryDay());
-							statisticsData.getActiveTime().addAndGet(updateInterval);
+						// 修改判断条件
+						if (active) {
+							statisticsData.setRunProjectPath(projectPath);
+							if (statisticsData.getCreateDate().equals(DateUtil.getCurDate())) {
+								statisticsData.getActiveTime().addAndGet(activeInterval);
+								//uiTimesState.setActiveTime(statisticsData.getActiveTime().longValue());
+							} else {
+								SingletonUtil.writeStatistics(uiTimesState.getMaxHistoryDay());
+								statisticsData.getActiveTime().addAndGet(updateInterval);
+							}
 						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 
-				try {
-					Thread.sleep(updateInterval);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt(); // 重新设置中断状态
+					try {
+						Thread.sleep(updateInterval);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt(); // 重新设置中断状态
+					}
 				}
-			}
-		});
-		statisticsMonitoringThread.start();
+			});
+			statisticsMonitoringThread.start();
 
+			threadMap.put(Constant.STATISTICS_MONITORING_THREAD + project.getLocationHash(), statisticsMonitoringThread);
+		}
 
 		// 注册项目关闭监听器
 		ApplicationManager.getApplication().getMessageBus().connect().subscribe(ProjectManager.TOPIC, new ProjectManagerListener() {
 			@Override
 			public void projectClosed(@NotNull Project projectToBeClosed) {
 				if (projectToBeClosed.equals(project)) {
-					running.set(false);
-					if (alarmMonitoringThread != null) {
-						alarmMonitoringThread.interrupt();
+					rungingMap.get(project.getLocationHash()).set(false);
+					if (threadMap.get(Constant.ALARM_MONITORING_THREAD + project.getLocationHash()) != null) {
+						threadMap.get(Constant.ALARM_MONITORING_THREAD + project.getLocationHash()).interrupt();
+						threadMap.remove(Constant.ALARM_MONITORING_THREAD + project.getLocationHash());
 					}
-					if (statisticsMonitoringThread != null) {
-						statisticsMonitoringThread.interrupt();
+					if (threadMap.get(Constant.STATISTICS_MONITORING_THREAD + project.getLocationHash()) != null) {
+						threadMap.get(Constant.STATISTICS_MONITORING_THREAD + project.getLocationHash()).interrupt();
+						threadMap.remove(Constant.STATISTICS_MONITORING_THREAD + project.getLocationHash());
 					}
+
 					// 多个项目关闭后才进行关闭
 					Project[] openProjects = ProjectManager.getInstance().getOpenProjects();
 					if (openProjects.length == 0) {

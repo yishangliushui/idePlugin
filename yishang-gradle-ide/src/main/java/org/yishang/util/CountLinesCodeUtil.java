@@ -16,15 +16,18 @@ public class CountLinesCodeUtil {
 		List<LineCode> lineCodeList = new ArrayList<>();
 		File directory = new File(directoryPath);
 		if (!directory.isDirectory()) {
-			lineCodeList.add(countLinesInFile(directoryPath));;
+			lineCodeList.add(countLinesInFile(directoryPath));
+			;
 		} else {
 			File[] files = directory.listFiles();
 			if (files != null) {
 				for (File file : files) {
 					if (file.isDirectory()) {
-						lineCodeList.addAll(countJavaLines(file.getAbsolutePath()));;
+						lineCodeList.addAll(countJavaLines(file.getAbsolutePath()));
+						;
 					} else if (file.getName().endsWith(".java")) {
-						lineCodeList.add(countLinesInFile(file.getAbsolutePath()));;
+						lineCodeList.add(countLinesInFile(file.getAbsolutePath()));
+						;
 					}
 				}
 			}

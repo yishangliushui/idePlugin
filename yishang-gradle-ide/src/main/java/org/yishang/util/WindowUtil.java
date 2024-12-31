@@ -16,38 +16,38 @@ import java.util.Map;
 
 public class WindowUtil {
 
-	public static Map<Project, ConsoleView> consoleViews = new HashMap<>();
+	public static Map<String, ConsoleView> consoleViews = new HashMap<>();
 
-	public static Map<Project, ToolWindow> toolWindows = new HashMap<>();
+	public static Map<String, ToolWindow> toolWindows = new HashMap<>();
 
 	// Utils 中的方法
-	public static void createToolWindow(Project project, ToolWindow toolWindow) {
+	public static void createToolConsoleWindow(Project project, ToolWindow toolWindow, String title) {
 		ConsoleView consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
-		WindowUtil.consoleViews.put(project, consoleView);
-		Content content = toolWindow.getContentManager().getFactory().createContent(consoleView.getComponent(), "TimerMaster Output", false);
+		WindowUtil.consoleViews.put(title + project.getLocationHash(), consoleView);
+		Content content = toolWindow.getContentManager().getFactory().createContent(consoleView.getComponent(), title, false);
 		content.getComponent().setVisible(true);
 		content.setCloseable(true);
 		toolWindow.getContentManager().addContent(content);
 	}
 
-	public static void consoleInfo(Project project, String msg) {
+	public static void consoleInfo(Project project, String msg, String title) {
 		// 检查并创建工具窗口
-		if (consoleViews.get(project) == null) {
-			ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TimerMaster Console");
+		if (consoleViews.get(title + project.getLocationHash()) == null) {
+			ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(title);
 			if (toolWindow != null) {
-				createToolWindow(project, toolWindow);
+				createToolConsoleWindow(project, toolWindow, title);
 			}
 		}
 
 		// 获取控制台视图并打印消息
-		ConsoleView consoleView = consoleViews.get(project);
+		ConsoleView consoleView = consoleViews.get(title + project.getLocationHash());
 		if (consoleView != null) {
 			consoleView.clear();
 			consoleView.print(msg, ConsoleViewContentType.NORMAL_OUTPUT);
 		}
 
 		// 激活工具窗口
-		ToolWindow toolWindow = toolWindows.get(project);
+		ToolWindow toolWindow = toolWindows.get(title + project.getLocationHash());
 		if (toolWindow != null) {
 			toolWindow.activate(null, false);
 		}

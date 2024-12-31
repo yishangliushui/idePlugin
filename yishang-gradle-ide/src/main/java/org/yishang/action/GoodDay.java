@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 
 
-public class TEST extends AnAction {
+public class GoodDay extends AnAction {
 
 	@Override
 	public void actionPerformed(AnActionEvent e) {

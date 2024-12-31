@@ -47,7 +47,7 @@ public class SingletonUtil {
 						Statistics statistics = readStatisticsFile();
 						statisticsData = new StatisticsData();
 						statistics.setRunProjectPath(statistics.getRunProjectPath());
-						if (StringUtils.isNotBlank(statistics.getStatisticsData())){
+						if (StringUtils.isNotBlank(statistics.getStatisticsData())) {
 							statisticsData.setCreateDate(JSON.parseObject(statistics.getStatisticsData(), StatisticsData.class).getCreateDate());
 						}
 						// 启动线程，定时保存数据
@@ -216,9 +216,9 @@ public class SingletonUtil {
 
 				Integer historySize = StringUtils.isBlank(maxHistoryDay) ? 365 : Integer.parseInt(maxHistoryDay);
 				List<String> historyData;
-				if (StringUtils.isNotBlank(statistics.getHistoryDataList())){
+				if (StringUtils.isNotBlank(statistics.getHistoryDataList())) {
 					historyData = JSON.parseObject(statistics.getHistoryDataList(), List.class);
-				}else {
+				} else {
 					historyData = new ArrayList<>();
 				}
 				if (!historyData.isEmpty() && historyData.size() >= historySize) {
@@ -227,9 +227,9 @@ public class SingletonUtil {
 				}
 				StatisticsData statisticsData = SingletonUtil.getInstance();
 				StatisticsData statisticsDataFile;
-				if (StringUtils.isNotBlank(statistics.getStatisticsData())){
+				if (StringUtils.isNotBlank(statistics.getStatisticsData())) {
 					statisticsDataFile = JSON.parseObject(statistics.getStatisticsData(), StatisticsData.class);
-				}else {
+				} else {
 					statisticsDataFile = statisticsData;
 				}
 				historyData.add(JSON.toJSONString(statisticsDataFile));

@@ -17,17 +17,11 @@ import java.awt.event.FocusListener;
 
 public class CountLinesCodeWindow implements ToolWindowFactory {
 
-	private final CountLinesCodeUI countLinesCodeUI = new CountLinesCodeUI();
-
-	private final JComponent mainPanel;
-
-	private final JTextField filePath = countLinesCodeUI.getFilePath();
-
-	public CountLinesCodeWindow() {
-		mainPanel = countLinesCodeUI.getMainPanel();
-	}
 	@Override
 	public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+		CountLinesCodeUI countLinesCodeUI = new CountLinesCodeUI();
+		JTextField filePath = countLinesCodeUI.getFilePath();
+		JPanel mainPanel = countLinesCodeUI.getMainPanel();
 		toolWindow.getContentManager().addContent(ContentFactory.getInstance().createContent(mainPanel, "", false));
 		countLinesCodeUI.getCountLineButton().addActionListener(new CountLinesCodeListener(countLinesCodeUI, project.getBasePath()));
 		countLinesCodeUI.getFilePath().addFocusListener(new FocusListener() {
@@ -47,7 +41,7 @@ public class CountLinesCodeWindow implements ToolWindowFactory {
 				}
 			}
 		});
-		if (StringUtils.isBlank(countLinesCodeUI.getFilePath().getText())){
+		if (StringUtils.isBlank(countLinesCodeUI.getFilePath().getText())) {
 			countLinesCodeUI.getFilePath().setText(project.getBasePath());
 		}
 	}
